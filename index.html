@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LARP Activity Scanner</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    background: #080808;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 15px;
+    overflow-y: auto;
+}
+
+.container {
+    width: min(92vw, 650px);
+    text-align: center;
+}
+
+h1 {
+    font-size: clamp(2rem, 7vw, 3rem);
+    letter-spacing: 4px;
+    margin: 0 0 8px;
+    color: #00ff88;
+    text-shadow: 0 0 12px rgba(0,255,136,.35);
+}
+
+.subtitle {
+    color: #aaa;
+    margin-bottom: 25px;
+}
+
+.upload {
+    width: 100%;
+    min-height: 115px;
+    border: 2px dashed #444;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: .2s;
+    background: #101010;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    color: #fff;
+}
+
+.upload:hover {
+    border-color: #00ff88;
+    background: #121212;
+}
+
+.upload-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.upload-subtitle {
+    color: #777;
+    font-size: .9rem;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.preview {
+    position: relative;
+    width: 100%;
+    max-height: 420px;
+    margin-top: 25px;
+    display: none;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #000;
+    border: 2px solid #222;
+}
+
+.preview img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+}
+
+.scanner {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: #00ff88;
+    box-shadow: 0 0 10px #00ff88, 0 0 25px #00ff88, 0 0 50px #00ff88;
+    top: 0;
+    display: none;
+}
+
+.scanning .scanner {
+    display: block;
+    animation: scan 2.5s linear infinite;
+}
+
+@keyframes scan {
+    0% { top: 0%; }
+    50% { top: calc(100% - 5px); }
+    100% { top: 0%; }
+}
+
+.scan-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,255,136,.05) 0 2px,
+        transparent 2px 6px
+    );
+    display: none;
+}
+
+.scanning .scan-overlay {
+    display: block;
+}
+
+button {
+    margin-top: 25px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    background: #00ff88;
+    color: #000;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #66ffb5;
+}
+
+#scanButton,
+#againButton {
+    display: none;
+}
+
+#scanButton {
+    background: #00ff88;
+    color: #000;
+    padding: 16px 34px;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+    box-shadow: 0 0 18px rgba(0,255,136,.2);
+}
+
+#scanButton:hover {
+    background: #66ffb5;
+    box-shadow: 0 0 25px rgba(0,255,136,.35);
+}
+
+.status {
+    margin-top: 20px;
+    min-height: 30px;
+    color: #00ff88;
+    font-family: monospace;
+    letter-spacing: 2px;
+}
+
+.result {
+    display: none;
+    margin: 25px 0 10px;
+    padding: 30px 15px;
+    border: 2px solid #00ff88;
+    border-radius: 15px;
+    background: rgba(0,255,136,.05);
+    box-shadow: 0 0 30px rgba(0,255,136,.15);
+    animation: appear .6s ease-out;
+}
+
+.result-number {
+    font-size: clamp(4rem, 18vw, 8rem);
+    font-weight: bold;
+    color: #00ff88;
+    text-shadow: 0 0 20px #00ff88;
+    line-height: 1;
+}
+
+.result-text {
+    margin-top: 15px;
+    font-size: clamp(1.1rem, 4vw, 2rem);
+    letter-spacing: 4px;
+    font-weight: bold;
+}
+
+.again {
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+}
+
+.again:hover {
+    background: #333;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: scale(.7);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.footer{margin-top:95px;padding:10px 0 25px;text-align:center}.footer-buttons{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.footer-button{display:inline-flex;align-items:center;justify-content:center;min-width:135px;padding:15px 22px;border-radius:10px;background:#fff;color:#111;text-decoration:none;font-weight:bold;font-size:1rem;border:2px solid #fff;box-shadow:0 0 18px rgba(255,255,255,.12);transition:.2s;cursor:pointer}.coffee-button{min-width:175px;padding:16px 26px;font-size:1.05rem}.footer-button:hover{background:#e8e8e8;border-color:#e8e8e8;transform:translateY(-2px);box-shadow:0 0 24px rgba(255,255,255,.2)}.copyright{margin-top:14px;color:#666;font-size:.8rem}.version{position:fixed;left:14px;bottom:12px;color:#555;font-family:monospace;font-size:.75rem;letter-spacing:1px;z-index:1000;pointer-events:none}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>LARP SCANNER</h1>
+    <div class="subtitle">Upload an image to determine LARP activity.</div>
+
+    <label class="upload" for="imageInput">
+        <div class="upload-title">📷 Click here to import an image</div>
+        <div class="upload-subtitle">JPG, PNG, WEBP</div>
+    </label>
+
+    <input type="file" id="imageInput" accept="image/*">
+
+    <div class="preview" id="preview">
+        <img id="image" alt="Selected image">
+        <div class="scan-overlay"></div>
+        <div class="scanner"></div>
+    </div>
+
+    <button id="scanButton">START SCAN</button>
+
+    <div class="status" id="status"></div>
+
+    <div class="result" id="result">
+        <div class="result-number" id="number">0%</div>
+        <div class="result-text">LARP ACTIVITY</div>
+    </div>
+
+    <button class="again" id="againButton">SCAN AGAIN</button>
+
+    <div class="footer">
+        <div class="footer-buttons">
+            <a href="#" class="footer-button" id="emailButton">✉️ Email</a>
+            <a href="#" class="footer-button coffee-button" id="coffeeButton">☕ Buy Me a coffee?</a>
+            <a href="#" class="footer-button" id="instagramButton">📷 Instagram</a>
+        </div>
+        <div class="copyright">All Rights Reserved 2026.</div>
+    </div>
+</div>
+
+<div class="version">Pre-Alpha 1.0.2</div>
+
+<script>
+const imageInput = document.getElementById("imageInput");
+const preview = document.getElementById("preview");
+const image = document.getElementById("image");
+const scanButton = document.getElementById("scanButton");
+const againButton = document.getElementById("againButton");
+const status = document.getElementById("status");
+const result = document.getElementById("result");
+const number = document.getElementById("number");
+
+let selectedImage = false;
+
+imageInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        status.textContent = "PLEASE SELECT AN IMAGE";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        image.src = e.target.result;
+        preview.style.display = "block";
+        scanButton.style.display = "inline-block";
+        againButton.style.display = "none";
+        result.style.display = "none";
+        status.textContent = "IMAGE READY";
+        selectedImage = true;
+    };
+
+    reader.readAsDataURL(file);
+});
+
+scanButton.addEventListener("click", function () {
+    if (!selectedImage) return;
+
+    scanButton.style.display = "none";
+    againButton.style.display = "none";
+    result.style.display = "none";
+    preview.classList.add("scanning");
+
+    const messagePool = [
+        "INITIALIZING SCANNER...",
+        "ANALYZING IMAGE...",
+        "DETECTING LARP SIGNAL...",
+        "CALIBRATING VISUAL SENSORS...",
+        "SCANNING FOR LARP ACTIVITY...",
+        "CHECKING ENVIRONMENTAL CUES...",
+        "READING VISUAL PATTERNS...",
+        "CROSS-REFERENCING SIGNALS...",
+        "MEASURING LARP INTENSITY...",
+        "EXAMINING ACTIVITY LEVELS...",
+        "PROCESSING IMAGE DATA...",
+        "SEARCHING FOR LARP INDICATORS...",
+        "ESTIMATING ACTIVITY DENSITY...",
+        "ANALYZING BEHAVIORAL CUES...",
+        "RUNNING LARP DETECTION MODEL...",
+        "FILTERING VISUAL NOISE...",
+        "VERIFYING SCAN RESULTS...",
+        "COMPARING SIGNAL STRENGTH...",
+        "CALCULATING ACTIVITY SCORE...",
+        "PREPARING FINAL RESULT..."
+    ];
+
+    // Randomly choose 7-9 unique messages from the 20-message pool.
+    const shuffledMessages = [...messagePool].sort(() => Math.random() - 0.5);
+    const messagesToShow = shuffledMessages.slice(0, Math.floor(Math.random() * 3) + 7);
+
+    let messageIndex = 0;
+    status.textContent = messagesToShow[0];
+
+    const messageTimer = setInterval(() => {
+        messageIndex++;
+        if (messageIndex < messagesToShow.length) {
+            status.textContent = messagesToShow[messageIndex];
+        }
+    }, 500);
+
+    // Slightly favor higher activity results: 60% chance of 50-100%, 40% chance of 1-49%.
+    const randomNumber = Math.random() < 0.6
+        ? Math.floor(Math.random() * 51) + 50
+        : Math.floor(Math.random() * 49) + 1;
+
+    setTimeout(() => {
+        clearInterval(messageTimer);
+        preview.classList.remove("scanning");
+        status.textContent = "SCAN COMPLETE";
+
+        setTimeout(() => {
+            number.textContent = randomNumber + "%";
+            result.style.display = "block";
+            againButton.style.display = "inline-block";
+
+            // Make sure the result is visible even on smaller screens.
+            result.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }, 300);
+
+    }, messagesToShow.length * 500 + 300);
+});
+
+againButton.addEventListener("click", function () {
+    result.style.display = "none";
+    status.textContent = "READY TO SCAN";
+    scanButton.style.display = "inline-block";
+    againButton.style.display = "none";
+});
+
+document.getElementById("coffeeButton").addEventListener("click", function(event){
+    event.preventDefault();
+    alert("☕ Thanks for the support! (This is just a fake button for now.)");
+});
+
+// Placeholder social/contact buttons for the public-release layout.
+document.getElementById("instagramButton").addEventListener("click", function(event){
+    event.preventDefault();
+});
+document.getElementById("emailButton").addEventListener("click", function(event){
+    event.preventDefault();
+});
+</script>
+</body>
+</html>
